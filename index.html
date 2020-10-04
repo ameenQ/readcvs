@@ -1,100 +1,143 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>  
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/tinymce.min.js"
+        integrity="sha512-rCSG4Ab3y6N79xYzoaCqt9gMHR0T9US5O5iBuB25LtIQ1Hsv3jKjREwEMeud8q7KRgPtxhmJesa1c9pl6upZvg=="
+        crossorigin="anonymous"></script>
 </head>
+
 <body>
-    <h1>V2</h1>
-    <input type="file" id="my_file_input" >
-<textarea id="abc">
+    <h1>V3</h1>
+    <input type="file" id="my_file_input">
+    <textarea id="abc">
+
+
 
 </textarea>
+    <div>
+
+        <textarea dir="rtl" name="myTextarea" id="myTextarea">
+            <p style="text-align: right;">بحث</p>
+<p style="text-align: right;">$1</p>
+<p style="text-align: right;">الأسم: <strong>[1]</strong></p>
+        </textarea>
+    </div>
+
+
     <script>
+        tinymce.init({
+            selector: '#myTextarea',
+            direction:'rtl'
+            
+        })
         var obj_csv = {
-    size:0,
-    dataFile:[]
-};
-var oFileIn;
+            size: 0,
+            dataFile: []
+        };
+        var oFileIn;
 
-$(function() {
-    oFileIn = document.getElementById('my_file_input');
-    if(oFileIn.addEventListener) {
-        oFileIn.addEventListener('change', filePicked, false);
-    }
-});
-
-
-function filePicked(oEvent) {
-    // Get The File From The Input
-    var oFile = oEvent.target.files[0];
-    var sFilename = oFile.name;
-    // Create A File Reader HTML5
-    var reader = new FileReader();
-    
-    // Ready The Event For When A File Gets Selected
-    reader.onload = function(e) {
-        var data = e.target.result;
-        var workbook  = XLSX.read(data, {type: 'binary'});
-        var first_sheet_name = workbook.SheetNames[0];
-        var first_worksheet = workbook.Sheets[first_sheet_name];
-        var jsondata = XLSX.utils.sheet_to_json(first_worksheet, {header:1});
-    
-        parseData(jsondata);
-        // Loop Over Each Sheet
-      
-    };
-    
-    // Tell JS To Start Reading The File.. You could delay this if desired
-    reader.readAsBinaryString(oFile);
-}
-
- 
- 
-function parseData(data){
-
-
-    var temp = [];
-    var d='';
-    var i = 0;
-    var f=true;
-    data.forEach(element => {
-        if(f){
-            f=!f;
-            return;
-        }
-        temp[i]=[];
-        d+="[";
-
-        element.forEach(e => {
-            d+="'"+e+"',";
-            temp[i].push(e);
+        $(function () {
+            oFileIn = document.getElementById('my_file_input');
+            if (oFileIn.addEventListener) {
+                oFileIn.addEventListener('change', filePicked, false);
+            }
         });
 
 
-        d=d.slice(0, -1);
-        d+="],";
-        i++;
-    });
-    d=d.slice(0, -1);
+        function filePicked(oEvent) {
 
-  
+            // Get The File From The Input
+            var oFile = oEvent.target.files[0];
+            var sFilename = oFile.name;
+            // Create A File Reader HTML5
+            var reader = new FileReader();
+
+            // Ready The Event For When A File Gets Selected
+            reader.onload = function (e) {
+                var data = e.target.result;
+                var workbook = XLSX.read(data, { type: 'binary' });
+                var first_sheet_name = workbook.SheetNames[0];
+                var first_worksheet = workbook.Sheets[first_sheet_name];
+                var jsondata = XLSX.utils.sheet_to_json(first_worksheet, { header: 1 });
+
+                parseData(jsondata);
+                // Loop Over Each Sheet
+
+            };
+
+            // Tell JS To Start Reading The File.. You could delay this if desired
+            reader.readAsBinaryString(oFile);
+        }
 
 
-    var x = 'script';
-    var b=`
+
+        function parseData(data) {
+
+
+            var temp = [];
+            var d = '';
+            var i = 0;
+            var f = true;
+            data.forEach(element => {
+                if (f) {
+                    f = !f;
+                    return;
+                }
+                temp[i] = [];
+                d += "[";
+
+                element.forEach(e => {
+                    e = e + "";
+                    e = e.replace(/;/gi, "<br>");
+                    d += "'" + e + "',";
+                    temp[i].push(e);
+                });
+
+
+                d = d.slice(0, -1);
+                d += "],";
+                i++;
+            });
+            d = d.slice(0, -1);
+
+            var myContent = tinymce.activeEditor.getContent();
+            console.log(myContent);
+
+
+            myContent = myContent.replace(/\$1/gi, `<input type="text" id="myText" value=""><button onclick="myFunction()">بحث</button></div>`);
+
+
+            var SS = "";
+            var regExp = /\[([0-9]+)\]/g;
+            var matches = myContent.match(regExp);
+
+            for (let index = 0; index < matches.length; index++) {
+
+                matches[index] = matches[index].replace(/\[/gi, "");
+                matches[index] = matches[index].replace(/\]/gi, "");
+                SS += "'" + ((matches[index]*1)-1) + "',";
+            }
+            SS = SS.slice(0, -1);
+
+            myContent = myContent.replace(/\[(\d+)\]/g, function(m, p1){
+ return '<span id=\'S'+((p1*1)-1)+'\'></span>' }
+)
+            console.log(SS);
+
+            console.log(myContent);
+
+
+            var x = 'script';
+            var b = `
     <div dir='rtl'>
     <h3>بحث</h3>
 
-    <input type="text" id="myText" value="">
-
-
-
-    <button onclick="myFunction()">بحث</button>
-
-    <p id="demo"></p>
+    `+myContent+`
 
     <script>
         var x;
@@ -103,22 +146,28 @@ function parseData(data){
         }
         function myFunction() {
             x = document.getElementById("myText").value;
-            var data = [`+d+`];
-
+            
+            
+            var data = [`+ d + `];
+            var aD=[`+ SS + `];
+            
             var a = data.find(checkid);
             if (a != undefined) {
-
-                document.getElementById("demo").innerHTML = a[1];
+                for (let i = 0; i < aD.length; i++) {
+                    document.getElementById("S"+aD[i]).innerHTML = a[aD[i]];
+                                            
+                }
             }
 
 
         }
-    `+`</`+ x +`>
+    `+ `</` + x + `>
     </div>
     `;
-  
-    document.getElementById("abc").innerHTML = b;
-}
+
+            document.getElementById("abc").innerHTML = b;
+        }
     </script>
 </body>
+
 </html>
