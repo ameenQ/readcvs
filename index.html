@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <h1>V4</h1>
+    <h1>V5</h1>
     <input type="file" id="my_file_input">
     <textarea id="abc">
 
@@ -127,9 +127,15 @@
             myContent = myContent.replace(/\[(\d+)\]/g, function(m, p1){
  return '<span id=\'S'+((p1*1)-1)+'\'></span>' }
 )
-            console.log(SS);
 
-            console.log(myContent);
+var SSI = "";
+           
+            
+
+myContent = myContent.replace(/\$\(([0-9]+)\)/g, function(m, p1){
+    SSI += "'" + ((p1*1)-1) + "',";
+ return '<span id=\'IS'+((p1*1)-1)+'\'></span>' });
+ SSI = SSI.slice(0, -1);
 
 
             var x = 'script';
@@ -149,11 +155,18 @@
             
             var data = [`+ d + `];
             var aD=[`+ SS + `];
+            var aDI=[`+ SSI + `];
             
             var a = data.find(checkid);
             if (a != undefined) {
                 for (let i = 0; i < aD.length; i++) {
                     document.getElementById("S"+aD[i]).innerHTML = a[aD[i]];
+                                            
+                }
+            }
+            if (a != undefined) {
+                for (let i = 0; i < aDI.length; i++) {
+                    document.getElementById("IS"+aDI[i]).innerHTML ='<img src="'+a[aDI[i]]+'" >' ;
                                             
                 }
             }
