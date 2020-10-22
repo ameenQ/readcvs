@@ -22,9 +22,22 @@
     <div>
 
         <textarea dir="rtl" name="myTextarea" id="myTextarea">
-            <p style="text-align: right;">بحث</p>
-<p style="text-align: right;">$1</p>
-<p style="text-align: right;">الأسم: <strong>[1]</strong></p>
+    
+        
+    
+    
+    <p style="text-align: right;">الأسم: <strong>[3]</strong></p>
+    <p style="text-align: right;">الرقم الشخصي: <strong>[1]</strong></p>
+    <p style="text-align: right;">الرقم الاكاديمي: <strong>[2]</strong></p>
+    <p style="text-align: right;">الشعبة: <strong>[4]</strong></p>
+    <p style="text-align: right;">التخصص: </strong> <strong>[5]</strong></p>
+    <p dir="rtl" style="text-align: right;">الايميل الخاص بك: <strong>[8]</strong></p>
+    <p style="text-align: right;">المجمع: <strong>[6]</strong></p>
+    <p style="text-align: right;">كيفية الحصول على كلمة المرور: <a href="https://yalla365.net/">أضغط هنا</a></strong></p>
+    <p style="text-align: right;">المقررات المسجلة لك: </strong></p>
+    <p style="text-align: right;">[10]</strong></p>
+    <p dir="rtl" style="text-align: right;">$(9)</p>
+
         </textarea>
     </div>
 
@@ -140,12 +153,24 @@ myContent = myContent.replace(/\$\(([0-9]+)\)/g, function(m, p1){
 
             var x = 'script';
             var b = `
-    <div dir='rtl'>
-
+            <div dir='rtl'>
+            <p style="text-align: right;">بحث</p>
+    <p style="text-align: right;"><input type="text" id="myText" value=""><button onclick="myFunction()">بحث</button>
+        <button onclick="print()" id="data3" style="display: none;">طباعة</button>
+   
+    
+        <div id="data" style="display: none;">
     `+myContent+`
-
+</div>
+<div id="data2" style="display: none;text-align: right;">
+الدارس غير مسجل في المدرسة
+</div>
+</div>
     <script>
+ 
+
         var x;
+
         function pad_with_zeroes(number, length) {
 
             var my_string = '' + number;
@@ -156,36 +181,56 @@ myContent = myContent.replace(/\$\(([0-9]+)\)/g, function(m, p1){
             return my_string;
 
         }
-                
+                    
         function checkid(row) {
             return pad_with_zeroes(row[0], 9)  == pad_with_zeroes(x, 9);
         }
-        function myFunction() {
-            x = document.getElementById("myText").value;
-            
-            
-            var data = [`+ d + `];
+
+
+function myFunction() {
+    x = document.getElementById("myText").value;//900402032
+    x = x.trim();
+    document.getElementById("data").style.display = "none";
+    document.getElementById("data3").style.display = "none";
+    document.getElementById("data2").style.display = "block";
+    
+  
+    var data = [`+ d + `];
             var aD=[`+ SS + `];
             var aDI=[`+ SSI + `];
-            
-            var a = data.find(checkid);
-            if (a != undefined) {
-                for (let i = 0; i < aD.length; i++) {
-                    document.getElementById("S"+aD[i]).innerHTML = a[aD[i]];
-                                            
-                }
-            }
-            if (a != undefined) {
-                for (let i = 0; i < aDI.length; i++) {
-                    document.getElementById("IS"+aDI[i]).innerHTML ='<img src="'+a[aDI[i]]+'" >' ;
-                                            
-                }
-            }
-
-
+    
+    var a = data.find(checkid);
+    if (a != undefined) {
+        document.getElementById("data").style.display = "block";
+        document.getElementById("data3").style.display = "block";
+        document.getElementById("data2").style.display = "none";
+        for (let i = 0; i < aD.length; i++) {
+            document.getElementById("S"+aD[i]).innerHTML = a[aD[i]];
+                                    
         }
+    }
+    if (a != undefined) {
+        for (let i = 0; i < aDI.length; i++) {
+            document.getElementById("IS"+aDI[i]).innerHTML ='<a style="text-align: right;" href="'+a[aDI[i]]+'" >لمعرفة جدول الحصص الافتراضية اضغط هنا</a>' ;
+                                    
+        }
+    }
+
+
+}
+
+function print(){
+    var divContents = document.getElementById("data").innerHTML;
+    var a = window.open('', '', 'height=500, width=500');
+    a.document.write('<html dir="rtl" >');
+
+    a.document.write(divContents);
+    a.document.write('</'+'body><'+'/html>');
+    a.document.close();
+    a.print();
+}
     `+ `</` + x + `>
-    </div>
+    
     `;
 
             document.getElementById("abc").innerHTML = b;
