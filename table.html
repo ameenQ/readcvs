@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/5.5.1/tinymce.min.js"
+        integrity="sha512-rCSG4Ab3y6N79xYzoaCqt9gMHR0T9US5O5iBuB25LtIQ1Hsv3jKjREwEMeud8q7KRgPtxhmJesa1c9pl6upZvg=="
+        crossorigin="anonymous"></script>
+    <style>
+        table {
+            direction: rtl;
+        }
+
+        table {
+            /* border: 1px solid black; */
+            border-collapse: collapse;
+        }
+
+        .up {
+            border-left: 1px solid black;
+            border-right: 1px solid black;
+            border-bottom: 1px solid black;
+
+        }
+
+        .down {
+            border-top: 1px solid black;
+            border-left: 1px solid black;
+            border-right: 1px solid black;
+
+        }
+
+        .full {
+            border: 1px solid black;
+
+        }
+    </style>
+</head>
+
+<body>
+    <h1>V6</h1>
+    <input type="file" id="my_file_input">
+    <!-- <button  onclick="exportTableToExcel('table')">تنزيل</button> -->
+    <div id="c">
+    </div>
+
+
+    <script>
+        tinymce.init({
+            selector: '#myTextarea',
+            direction: 'rtl'
+
+        })
+        var obj_csv = {
+            size: 0,
+            dataFile: []
+        };
+        var oFileIn;
+
+        $(function () {
+            oFileIn = document.getElementById('my_file_input');
+            if (oFileIn.addEventListener) {
+                oFileIn.addEventListener('change', filePicked, false);
+            }
+        });
+
+
+        function filePicked(oEvent) {
+
+            // Get The File From The Input
+            var oFile = oEvent.target.files[0];
+            var sFilename = oFile.name;
+            // Create A File Reader HTML5
+            var reader = new FileReader();
+
+            // Ready The Event For When A File Gets Selected
+            reader.onload = function (e) {
+                var data = e.target.result;
+                var workbook = XLSX.read(data, { type: 'binary' });
+                var first_sheet_name = workbook.SheetNames[0];
+                var first_sheet_name2 = workbook.SheetNames[1];
+                var first_worksheet = workbook.Sheets[first_sheet_name];
+                var jsondata = XLSX.utils.sheet_to_json(first_worksheet, { header: 1 });
+                var first_worksheet2 = workbook.Sheets[first_sheet_name2];
+                var jsondata2 = XLSX.utils.sheet_to_json(first_worksheet2, { header: 1 });
+
+                parseData(jsondata, jsondata2);
+                // Loop Over Each Sheet
+
+            };
+
+            // Tell JS To Start Reading The File.. You could delay this if desired
+            reader.readAsBinaryString(oFile);
+        }
+
+        function exportTableToExcel(tableID, filename = '') {
+            var downloadLink;
+            var dataType = 'application/vnd.ms-excel';
+            var tableSelect = document.getElementById(tableID);
+            var tableHTML = tableSelect.outerHTML.replace(/ /g, '%20');
+
+            // Specify file name
+            filename = filename ? filename + '.xls' : 'excel_data.xls';
+
+            // Create download link element
+            downloadLink = document.createElement("a");
+
+            document.body.appendChild(downloadLink);
+
+            if (navigator.msSaveOrOpenBlob) {
+                var blob = new Blob(['\ufeff', tableHTML], {
+                    type: dataType
+                });
+                navigator.msSaveOrOpenBlob(blob, filename);
+            } else {
+                // Create a link to the file
+                downloadLink.href = 'data:' + dataType + ', ' + tableHTML;
+
+                // Setting the file name
+                downloadLink.download = filename;
+
+                //triggering the function
+                downloadLink.click();
+            }
+        }
+
+
+        function parseData(data, data2) {
+
+            let section = [];
+            $.each(data2, function (i, el) {
+                if ($.inArray(el[1], section) === -1) section.push(el[1]);
+            });
+            section.sort();
+            // console.table(data2)
+            // console.table(section)
+            let fullA = [];
+            section.forEach(element => {
+                fullA.push({ name: element.trim(), teachers: [] });
+            });
+
+
+            let classes = [];
+            for (let i = 0; i < data.length; i++) {
+                const e = data[i];
+                if (Number.isInteger(e[0])) {
+                    for (let j = 2; j < 8; j++) {
+
+                        let aName = data2.find(item => {
+                            return item[0].trim() == e[j].trim();
+                        })
+                        let t = { name: e[j].trim(), section: aName[1].trim(), day: e[0], class: e[1].trim(), subject: data[i + 1][j].trim(), time: j - 1 }
+
+                        classes.push(t);
+
+                    }
+                    i++;
+                }
+
+
+            }
+
+
+
+            let fullT = [];
+            classes.forEach(e => {
+                let a = fullT.findIndex(item => {
+                    return item.name == e.name;
+                })
+                let j = fullT.length;
+                if (a < 0) {
+                    let T = [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]
+                    fullT[j] = { name: e.name, section: e.section, table: T, count: 0 };
+                } else {
+                    j = a;
+                }
+
+                fullT[j].count++;
+                fullT[j].table[e.day - 1][e.time - 1].push({ subject: e.subject, class: e.class });
+
+
+
+            });
+
+            fullA.forEach(e => {
+                fullT.forEach(element => {
+                    if (e.name == element.section) {
+                        e.teachers.push(element);
+
+                    }
+
+                });
+
+
+            });
+            // console.log(fullA);
+            let days = [
+                'الأحد',
+                'الاثنين',
+                'الثلاثاء',
+                'الأربعاء',
+                'الخميس',
+            ]
+            // let html = '<table id="table">';
+            // fullA.forEach(ea => {
+
+            //     html += "<tr><td class='full' colspan='7'>" + ea.name + "</td></tr>"
+            //     html += "<tr><td></td></tr>"
+            //     ea.teachers.forEach(e => {
+            //         html += "<tr><td class='full'>اسم المعلم</td><td class='full' colspan='3'>" + e.name + "</td><td class='full' colspan='2'>مجموع الحصص المباشرة</td><td class='full' colspan='1'>" + e.count + "</td></tr>"
+            //         let i = 0;
+            //         html += "<tr><td class='full'></td><td class='full'>1</td><td class='full'>2</td><td class='full'>3</td><td class='full'>4</td><td class='full'>5</td><td class='full'>6</td></tr>"
+            //         e.table.forEach(element => {
+            //             html += "<tr>";
+            //             html += "<td class='full' rowspan='2'>" + days[i] + "</td>";
+            //             element.forEach(et => {
+            //                 if (et.length > 0) {
+            //                     html += "<td class='down'>" + et[0].subject + "</td>";
+
+            //                 } else {
+            //                     html += "<td class='down'></td>";
+
+            //                 }
+            //             });
+            //             html += "</tr>";
+            //             element.forEach(et => {
+            //                 if (et.length > 0) {
+
+            //                     html += "<td class='up'>" + et[0].class + "</td>";
+            //                 } else {
+
+            //                     html += "<td class='up'></td>";
+            //                 }
+            //             });
+
+            //             html += "</tr>";
+
+            //             i++;
+            //         });
+            //         html += "<tr><td colspan='7'></td></tr>"
+            //     });
+            // });
+            // html += '</table>';
+            // document.getElementById("c").innerHTML = html;
+
+
+
+            let html = '<table id="table">';
+            fullA.forEach(ea => {
+
+                html += "<tr><td class='full' colspan='31'>" + ea.name + "</td></tr>"
+                html += "<tr><td></td></tr>"
+                html += "<tr><td class='full' rowspan='2' colspan='1'></td>"
+                    days.forEach(day => {
+                        html += "<td class='full' rowspan='1' colspan='6'>" + day + "</td>"
+
+                    });
+                    html += "</tr>"
+                    html += "<tr>"
+                    for (let index = 0; index < 5; index++) {
+                        for (let i = 0; i < 6; i++) {
+                            html += "<td class='full' >"+(i+1)+"</td>";
+
+
+                        }
+
+                    }
+
+                    html += "</tr>"
+                ea.teachers.forEach(e => {
+                    
+
+
+                    html += "<tr><td class='full' rowspan='2'>" + e.name + "</td>"
+                    
+                    e.table.forEach(element => {
+                        
+                        
+                        element.forEach(et => {
+                            if (et.length > 0) {
+                                html += "<td class='down'>" + et[0].subject + "</td>";
+
+                            } else {
+                                html += "<td class='down'></td>";
+
+                            }
+                        });
+      
+
+                        
+                    
+                    });
+                    html += "</tr>";
+                    html += "<tr>";
+                    e.table.forEach(element => {
+                        
+                        
+                        
+                        
+                        element.forEach(et => {
+                            if (et.length > 0) {
+
+                                html += "<td class='up'>" + et[0].class + "</td>";
+                            } else {
+
+                                html += "<td class='up'></td>";
+                            }
+                        });
+
+                        
+                    
+                    });
+                    html += "</tr>";
+                });
+                html += "<tr><td colspan='7'></td></tr>"
+            });
+            html += '</table>';
+            document.getElementById("c").innerHTML = html;
+
+            /////////////////Names
+            // let temp = [];
+            // classes.forEach(e => {
+            //     temp.push(e.name);
+
+            // });
+            // let tempU = [];
+            // $.each(temp, function(i, el){
+            //     if($.inArray(el, tempU) === -1) tempU.push(el);
+            // });
+            // tempU.sort();
+            // console.table(tempU);
+
+            /////////////////Classses
+            // let temp = [];
+            // classes.forEach(e => {
+            //     console.log(e);
+            //     temp.push(e.class);
+
+            // });
+            // let tempU = [];
+            // $.each(temp, function(i, el){
+            //     if($.inArray(el, tempU) === -1) tempU.push(el);
+            // });
+            // tempU.sort();
+            // console.log(tempU);
+
+            ///////////////////// Subject
+            // let temp = [];
+            // classes.forEach(e => {
+
+            //     temp.push(e.subject);
+
+            // });
+            // let tempU = [];
+            // $.each(temp, function(i, el){
+            //     if($.inArray(el, tempU) === -1) tempU.push(el);
+            // });
+            // tempU.sort();
+            // console.table(tempU);
+
+
+
+        }
+    </script>
+</body>
+
+</html>
