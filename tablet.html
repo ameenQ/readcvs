@@ -32,12 +32,6 @@
             border-right: 1px solid black;
 
         }
-        .leftright {
-            
-            border-left: 1px solid black;
-            border-right: 1px solid black;
-
-        }
 
         .full {
             border: 1px solid black;
@@ -153,12 +147,12 @@
             for (let i = 0; i < data.length; i++) {
                 const e = data[i];
                 if (Number.isInteger(e[0])) {
-                    for (let j = 3; j < 9; j++) {
+                    for (let j = 2; j < 8; j++) {
 
                         let aName = data2.find(item => {
                             return item[0].trim() == e[j].trim();
                         })
-                        let t = { name: e[j].trim(), section: aName[1].trim(), location: e[2] + " " + data[i + 1][2].trim() , day: e[0], class: e[1].trim(), subject: data[i + 1][j].trim(), time: j - 2 }
+                        let t = { name: e[j].trim(), section: aName[1].trim(), day: e[0], class: e[1].trim(), subject: data[i + 1][j].trim(), time: j - 1 }
 
                         classes.push(t);
 
@@ -183,9 +177,9 @@
                 } else {
                     j = a;
                 }
-                
+
                 fullT[j].count++;
-                fullT[j].table[e.day - 1][e.time - 1].push({ subject: e.subject, location: e.location , class: e.class });
+                fullT[j].table[e.day - 1][e.time - 1].push({ subject: e.subject, class: e.class });
 
 
 
@@ -210,94 +204,18 @@
                 'الأربعاء',
                 'الخميس',
             ]
-            let html = '<table id="table">';
-            fullA.forEach(ea => {
-
-                html += "<tr><td class='full' colspan='7'>" + ea.name + "</td></tr>"
-                html += "<tr><td></td></tr>"
-                ea.teachers.forEach(e => {
-                    html += "<tr><td class='full'>اسم المعلم</td><td class='full' colspan='3'>" + e.name + "</td><td class='full' colspan='2'>مجموع الحصص المباشرة</td><td class='full' colspan='1'>" + e.count + "</td></tr>"
-                    let i = 0;
-                    html += "<tr><td class='full'></td><td class='full'>1</td><td class='full'>2</td><td class='full'>3</td><td class='full'>4</td><td class='full'>5</td><td class='full'>6</td></tr>"
-                    e.table.forEach(element => {
-                        html += "<tr>";
-                        html += "<td class='full' rowspan='3'>" + days[i] + "</td>";
-                        element.forEach(et => {
-                            if (et.length > 0) {
-                                html += "<td class='down'>" + et[0].subject + "</td>";
-
-                            } else {
-                                html += "<td class='down'></td>";
-
-                            }
-                        });
-                        html += "</tr>";
-                        html += "<tr>";
-                        element.forEach(et => {
-                            if (et.length > 0) {
-
-                                html += "<td class='leftright'>" + et[0].class + "</td>";
-                            } else {
-
-                                html += "<td class='leftright'></td>";
-                            }
-                        });
-
-                        html += "</tr>";
-                        html += "<tr>";
-                        element.forEach(et => {
-                            if (et.length > 0) {
-
-                                html += "<td class='up'>" + et[0].location + "</td>";
-                            } else {
-
-                                html += "<td class='up'></td>";
-                            }
-                        });
-
-                        html += "</tr>";
-
-                        i++;
-                    });
-                    html += "<tr><td colspan='7'></td></tr>"
-                });
-            });
-            html += '</table>';
-            document.getElementById("c").innerHTML = html;
-
-
-
             // let html = '<table id="table">';
             // fullA.forEach(ea => {
 
-            //     html += "<tr><td class='full' colspan='31'>" + ea.name + "</td></tr>"
+            //     html += "<tr><td class='full' colspan='7'>" + ea.name + "</td></tr>"
             //     html += "<tr><td></td></tr>"
-            //     html += "<tr><td class='full' rowspan='2' colspan='1'></td>"
-            //         days.forEach(day => {
-            //             html += "<td class='full' rowspan='1' colspan='6'>" + day + "</td>"
-
-            //         });
-            //         html += "</tr>"
-            //         html += "<tr>"
-            //         for (let index = 0; index < 5; index++) {
-            //             for (let i = 0; i < 6; i++) {
-            //                 html += "<td class='full' >"+(i+1)+"</td>";
-
-
-            //             }
-
-            //         }
-
-            //         html += "</tr>"
             //     ea.teachers.forEach(e => {
-                    
-
-
-            //         html += "<tr><td class='full' rowspan='2'>" + e.name + "</td>"
-                    
+            //         html += "<tr><td class='full'>اسم المعلم</td><td class='full' colspan='3'>" + e.name + "</td><td class='full' colspan='2'>مجموع الحصص المباشرة</td><td class='full' colspan='1'>" + e.count + "</td></tr>"
+            //         let i = 0;
+            //         html += "<tr><td class='full'></td><td class='full'>1</td><td class='full'>2</td><td class='full'>3</td><td class='full'>4</td><td class='full'>5</td><td class='full'>6</td></tr>"
             //         e.table.forEach(element => {
-                        
-                        
+            //             html += "<tr>";
+            //             html += "<td class='full' rowspan='2'>" + days[i] + "</td>";
             //             element.forEach(et => {
             //                 if (et.length > 0) {
             //                     html += "<td class='down'>" + et[0].subject + "</td>";
@@ -307,18 +225,7 @@
 
             //                 }
             //             });
-      
-
-                        
-                    
-            //         });
-            //         html += "</tr>";
-            //         html += "<tr>";
-            //         e.table.forEach(element => {
-                        
-                        
-                        
-                        
+            //             html += "</tr>";
             //             element.forEach(et => {
             //                 if (et.length > 0) {
 
@@ -329,15 +236,89 @@
             //                 }
             //             });
 
-                        
-                    
+            //             html += "</tr>";
+
+            //             i++;
             //         });
-            //         html += "</tr>";
+            //         html += "<tr><td colspan='7'></td></tr>"
             //     });
-            //     html += "<tr><td colspan='7'></td></tr>"
             // });
             // html += '</table>';
             // document.getElementById("c").innerHTML = html;
+
+
+
+            let html = '<table id="table">';
+            fullA.forEach(ea => {
+
+                html += "<tr><td class='full' colspan='31'>" + ea.name + "</td></tr>"
+                html += "<tr><td></td></tr>"
+                html += "<tr><td class='full' rowspan='2' colspan='1'></td>"
+                    days.forEach(day => {
+                        html += "<td class='full' rowspan='1' colspan='6'>" + day + "</td>"
+
+                    });
+                    html += "</tr>"
+                    html += "<tr>"
+                    for (let index = 0; index < 5; index++) {
+                        for (let i = 0; i < 6; i++) {
+                            html += "<td class='full' >"+(i+1)+"</td>";
+
+
+                        }
+
+                    }
+
+                    html += "</tr>"
+                ea.teachers.forEach(e => {
+                    
+
+
+                    html += "<tr><td class='full' rowspan='2'>" + e.name + "</td>"
+                    
+                    e.table.forEach(element => {
+                        
+                        
+                        element.forEach(et => {
+                            if (et.length > 0) {
+                                html += "<td class='down'>" + et[0].subject + "</td>";
+
+                            } else {
+                                html += "<td class='down'></td>";
+
+                            }
+                        });
+      
+
+                        
+                    
+                    });
+                    html += "</tr>";
+                    html += "<tr>";
+                    e.table.forEach(element => {
+                        
+                        
+                        
+                        
+                        element.forEach(et => {
+                            if (et.length > 0) {
+
+                                html += "<td class='up'>" + et[0].class + "</td>";
+                            } else {
+
+                                html += "<td class='up'></td>";
+                            }
+                        });
+
+                        
+                    
+                    });
+                    html += "</tr>";
+                });
+                html += "<tr><td colspan='7'></td></tr>"
+            });
+            html += '</table>';
+            document.getElementById("c").innerHTML = html;
 
             /////////////////Names
             // let temp = [];
